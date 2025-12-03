@@ -43,10 +43,9 @@
     <p><strong>Instructor:</strong> Ph.D. Ana Rodrigues</p>
     <p><strong>Team Members:</strong></p>
     <ul>
-      <li>...</li>
-      <li>...</li>
-      <li>...</li>
-      <li>...</li>
+      <li>Alijah Murphy-Lewis</li>
+      <li>Kymani Whitehead</li>
+      <li>Pasha Herd</li>
     </ul>
   </section>
 
@@ -78,84 +77,73 @@
     </ul>
   </section>
 
-  <section id="bom">
-    <h2>Bill of Materials (BoM)</h2>
-    <table>
-      <thead>
-        <tr>
-          <th>Item</th>
-          <th>Qty</th>
-          <th>Unit Price (CAD)</th>
-          <th>Subtotal (CAD)</th>
-          <th>Source</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td>Arduino Uno Rev3</td>
-          <td>1</td>
-          <td>$27.60</td>
-          <td>$27.60</td>
-          <td><a href="https://store-usa.arduino.cc/products/arduino-uno-rev3">Arduino Store</a></td>
-        </tr>
-        <tr>
-          <td>HC-SR04 Ultrasonic Sensor</td>
-          <td>1</td>
-          <td>$3.95</td>
-          <td>$3.95</td>
-          <td><a href="https://www.adafruit.com/product/3942">Adafruit</a></td>
-        </tr>
-        <tr>
-          <td>Passive Buzzer</td>
-          <td>1</td>
-          <td>$0.95</td>
-          <td>$0.95</td>
-          <td><a href="https://www.sparkfun.com/passive-buzzer-module.html">SparkFun</a></td>
-        </tr>
-        <tr>
-          <td>LEDs (Red, Yellow, Green)</td>
-          <td>3</td>
-          <td>$0.20</td>
-          <td>$0.60</td>
-          <td>Adafruit</td>
-        </tr>
-        <tr>
-          <td>220 Ω Resistors</td>
-          <td>3</td>
-          <td>$0.03</td>
-          <td>$0.09</td>
-          <td>Adafruit</td>
-        </tr>
-        <tr>
-          <td>Breadboard</td>
-          <td>1</td>
-          <td>$4.95</td>
-          <td>$4.95</td>
-          <td><a href="https://www.adafruit.com/product/64">Adafruit</a></td>
-        </tr>
-        <tr>
-          <td>Jumper Wires</td>
-          <td>1 set</td>
-          <td>$3.50</td>
-          <td>$3.50</td>
-          <td><a href="https://www.sparkfun.com/jumper-wires-standard-7-m-m-30-awg-30-pack.html">SparkFun</a>
-          </td>
-        </tr>
-      </tbody>
-      <tfoot>
-        <tr>
-          <td colspan="3">Estimated Total</td>
-          <td>$41.64</td>
-          <td>—</td>
-        </tr>
-      </tfoot>
-    </table>
-  </section>
-
+ <section id="bom">
+  <h2>Bill of Materials (BoM)</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Component</th>
+        <th>Description</th>
+        <th>Price (CAD)</th>
+        <th>Link</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Arduino Uno R3</td>
+        <td>Main microcontroller board</td>
+        <td>$27.20</td>
+        <td><a href="https://store-usa.arduino.cc/products/arduino-uno-rev3">Arduino Store</a></td>
+      </tr>
+      <tr>
+        <td>0.96” OLED Display (SSD1306)</td>
+        <td>128×64 I2C OLED — user purchased price</td>
+        <td>$13.42</td>
+        <td><a href="https://www.amazon.ca/">Amazon</a></td>
+      </tr>
+      <tr>
+        <td>Dual-Axis Joystick Module</td>
+        <td>Analog joystick (X/Y + SW)</td>
+        <td>$4.00</td>
+        <td><a href="https://www.canadarobotix.com/products/1240">Canada Robotix</a></td>
+      </tr>
+      <tr>
+        <td>Push Button Switch</td>
+        <td>Momentary tactile button</td>
+        <td>$0.50 (from pack)</td>
+        <td><a href="https://www.amazon.ca/">Amazon</a></td>
+      </tr>
+      <tr>
+        <td>USB A-to-B Cable</td>
+        <td>USB cable for Arduino Uno</td>
+        <td>$12.99</td>
+        <td><a href="https://www.amazon.ca/">Amazon</a></td>
+      </tr>
+      <tr>
+        <td>Breadboard</td>
+        <td>Solderless prototyping board</td>
+        <td>$6.00</td>
+        <td><a href="https://www.amazon.ca/">Amazon</a></td>
+      </tr>
+      <tr>
+        <td>Jumper Wires</td>
+        <td>Male-to-male wires</td>
+        <td>$6.00</td>
+        <td><a href="https://www.amazon.ca/">Amazon</a></td>
+      </tr>
+    </tbody>
+    <tfoot>
+      <tr>
+        <td colspan="3">Total Price</td>
+        <td>$70.11</td>
+      </tr>
+    </tfoot>
+  </table>
+</section>
   <section id="prototype">
     <h2>Prototype</h2>
     <p>The following image shows the assembled prototype on a breadboard.</p>
-    <img src="prototype.jpg" alt="Collision warning system prototype">
+    <img src="./assets/IMG_4557.jpeg" alt="Collision warning system prototype">
   </section>
 
   <section id="code">
@@ -255,69 +243,34 @@ void loop() {
 
   <section id="conclusion">
     <h2>Conclusion</h2>
-    <p>The system effectively demonstrates distance-based alerting using Arduino. It’s affordable, educational, and
-      sustainable through reusable components.</p>
+    <p>The Collision Warning System successfully demonstrates how a low-cost Arduino Uno, an HC-SR04 ultrasonic sensor, LEDs, and a passive buzzer can be combined to provide real-time proximity alerts. The prototype implements three clear alert states (safe, caution, danger) and translates measured distances into unambiguous visual and auditory feedback suitable for simple collision-warning applications and classroom demonstrations.</p>
+    <p>In testing, the system reliably detected objects in the defined ranges and activated the corresponding LEDs and tones. Practical limitations observed include the sensor's beam angle and sensitivity to soft or irregular surfaces, occasional spurious readings, and limited buzzer audibility in noisy environments. Electrical power requirements are minimal, making the design appropriate for battery or USB-powered setups.</p>
+    <p>Recommended improvements include adding simple filtering or averaging of distance readings to reduce noise, implementing debounce/validation logic to avoid false triggers, and integrating a small display (e.g., SSD1306 OLED) to show numerical distance values. For more robust real-world use, consider higher-grade ranging sensors, adjustable thresholds, and enclosure/mounting design for stable sensor orientation.</p>
+    <p>Overall, this project provides a compact, educational proof-of-concept for proximity-based alerts and serves as a practical platform for further experimentation with sensors, embedded control logic, and human-machine feedback mechanisms.</p>
   </section>
 
  <section id="references">
   <h2>References</h2>
   <p>
-    The following external resources and example projects demonstrate related Arduino applications 
-    using ultrasonic distance sensors, passive buzzers, and multicolour LEDs:
+    The following external resources and example projects demonstrate similar Arduino applications:
   </p>
 
   <ul>
     <li>
-      Arduino Project Hub. (n.d.). 
-      <em>Ultrasonic sensor projects.</em> 
+      Arduino Project Hub. Author: giobbino. 
+      <em>Space Invaders.</em> 
       Arduino Project Hub. 
-      <a href="https://projecthub.arduino.cc/projects/tags/ultrasonic-sensor" target="_blank" rel="noopener noreferrer">
-        https://projecthub.arduino.cc/projects/tags/ultrasonic-sensor
+      <a href="https://projecthub.arduino.cc/giobbino/arduino-nano-space-invaders-8b8d41" target="_blank" rel="noopener noreferrer">
+        https://projecthub.arduino.cc/giobbino/arduino-nano-space-invaders-8b8d41
       </a>
     </li>
 
     <li>
-      Arduino Project Hub. (n.d.). 
-      <em>Buzzer projects.</em> 
+      Arduino Project Hub. Author: voske65. 
+      <em>Arduino Space Invaders</em> 
       Arduino Project Hub. 
-      <a href="https://create.arduino.cc/projecthub/projects/tags/buzzer" target="_blank" rel="noopener noreferrer">
-        https://create.arduino.cc/projecthub/projects/tags/buzzer
-      </a>
-    </li>
-
-    <li>
-      Arduino Project Hub. (n.d.). 
-      <em>LED projects.</em> 
-      Arduino Project Hub. 
-      <a href="https://projecthub.arduino.cc/projects/tags/led" target="_blank" rel="noopener noreferrer">
-        https://projecthub.arduino.cc/projects/tags/led
-      </a>
-    </li>
-
-    <li>
-      Instructables. (n.d.). 
-      <em>Distance measurement using ultrasonic sensor.</em> 
-      Instructables. 
-      <a href="https://www.instructables.com/Arduino-Distance-Measurement-Using-Ultrasonic-Senso/" target="_blank" rel="noopener noreferrer">
-        https://www.instructables.com/Arduino-Distance-Measurement-Using-Ultrasonic-Senso/
-      </a>
-    </li>
-
-    <li>
-      Circuit Basics. (n.d.). 
-      <em>How to use an ultrasonic sensor with Arduino.</em> 
-      Circuit Basics. 
-      <a href="https://www.circuitbasics.com/how-to-use-an-ultrasonic-sensor-with-arduino/" target="_blank" rel="noopener noreferrer">
-        https://www.circuitbasics.com/how-to-use-an-ultrasonic-sensor-with-arduino/
-      </a>
-    </li>
-
-    <li>
-      Last Minute Engineers. (n.d.). 
-      <em>Ultrasonic sensor tutorial.</em> 
-      Last Minute Engineers. 
-      <a href="https://lastminuteengineers.com/ultrasonic-sensor-arduino-tutorial/" target="_blank" rel="noopener noreferrer">
-        https://lastminuteengineers.com/ultrasonic-sensor-arduino-tutorial/
+      <a href="https://projecthub.arduino.cc/voske65/arduino-space-invaders-5a95d7" target="_blank" rel="noopener noreferrer">
+      https://projecthub.arduino.cc/voske65/arduino-space-invaders-5a95d7
       </a>
     </li>
   </ul>
