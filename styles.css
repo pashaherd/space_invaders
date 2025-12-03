@@ -1,130 +1,274 @@
-/* Global variables */
-:root{
-  --bg:#0f1720;
-  --card:#0b1220;
-  --muted:#9aa4b2;
-  --accent:#2dd4bf;
-  --text:#e6eef6;
-  --nav:#08101a;
-  --shadow: 0 6px 18px rgba(2,6,23,0.6);
-  --green:#22c55e;
-  --yellow:#f59e0b;
-  --red:#ef4444;
+html {
+    scroll-behavior: smooth;
 }
 
-/* Reset-ish */
-*{box-sizing:border-box}
-html,body{height:100%}
-body{
-  margin:0;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial;
-  background:linear-gradient(180deg,var(--bg) 0%, #071018 100%);
-  color:var(--text);
-  -webkit-font-smoothing:antialiased;
-  -moz-osx-font-smoothing:grayscale;
-  line-height:1.55;
+main {
+    padding: 100px 24px 40px;
+    /* pushes content below the navbar */
 }
 
-/* Fixed left navigation */
-#menu{
-  position:fixed;
-  left:0;
-  top:0;
-  width:220px;
-  height:100vh;
-  padding:20px 16px;
-  background:linear-gradient(180deg,var(--nav), #071119);
-  border-right:1px solid rgba(255,255,255,0.03);
-  box-shadow:var(--shadow);
-  overflow:auto;
-}
-#menu h3{
-  margin:0 0 12px 0;
-  font-size:1.05rem;
-  letter-spacing:0.6px;
-}
-#menu ul{list-style:none;padding:0;margin:0}
-#menu li{margin:8px 0}
-#menu a{
-  color:var(--muted);
-  text-decoration:none;
-  font-size:0.95rem;
-}
-#menu a:hover{color:var(--accent)}
 
-/* Page content spacing to avoid nav */
-body > h1, body > section{margin-left:260px;padding:28px 32px 8px 32px}
 
-/* Page title */
-#top{margin-top:12px;font-size:2rem}
-
-/* Section styles */
-section{
-  background:transparent;
-  max-width:920px;
-}
-section h2{
-  color:var(--accent);
-  margin:8px 0 10px 0;
-  font-size:1.2rem;
-}
-section p, section li{
-  color:var(--text);
-  font-size:0.98rem;
+:root {
+    color-scheme: light dark;
 }
 
-/* Table styling */
-table{width:100%;border-collapse:collapse;margin-top:8px;background:rgba(255,255,255,0.02)}
-thead th{background:rgba(255,255,255,0.03);color:var(--accent);text-align:left;padding:10px;border-bottom:1px solid rgba(255,255,255,0.04)}
-tbody td{padding:10px;border-bottom:1px solid rgba(255,255,255,0.02);color:var(--text)}
-tbody tr:nth-child(odd){background:rgba(255,255,255,0.01)}
-tfoot td{padding:10px;font-weight:600;border-top:1px solid rgba(255,255,255,0.04);background:rgba(255,255,255,0.02)}
-
-/* Images */
-section img{display:block;max-width:100%;height:auto;border-radius:6px;margin-top:10px;box-shadow:0 8px 24px rgba(2,6,23,0.7)}
-
-/* Prototype image special size */
-#prototype img{max-width:560px}
-
-/* Code block and copy button */
-pre.line-numbers{position:relative;padding:20px;border-radius:8px;background:#111417;color:var(--text);overflow:auto;margin-top:12px}
-pre.line-numbers code{display:block;white-space:pre;tab-size:2;font-family:SFMono-Regular,Consolas,"Liberation Mono",Menlo,monospace;font-size:0.9rem}
-.copy-btn{
-  position:absolute;right:10px;top:10px;
-  background:transparent;border:1px solid rgba(255,255,255,0.08);color:var(--muted);
-  padding:6px 10px;border-radius:6px;cursor:pointer;font-size:0.9rem
-}
-.copy-btn:hover{background:rgba(255,255,255,0.02);color:var(--text)}
-
-/* Buttons and interactive elements */
-button{font-family:inherit}
-
-/* LEDs listed with semantic colors */
-.led-sample{display:inline-block;padding:6px 10px;border-radius:6px;color:#051018;font-weight:700;margin-right:8px}
-.led-green{background:var(--green)}
-.led-yellow{background:var(--yellow)}
-.led-red{background:var(--red)}
-
-/* References and small text */
-#references ul{margin-top:4px}
-#references a{color:var(--accent)}
-
-/* Responsive adjustments */
-@media (max-width:900px){
-  #menu{position:relative;width:100%;height:auto;border-right:none;box-shadow:none;padding:12px}
-  body > h1, body > section{margin-left:0;padding:16px}
-  body{padding-bottom:40px}
+body {
+    font-family: system-ui, Arial, sans-serif;
+    line-height: 1.6;
+    margin: 24px;
+    background: #f6f7f9;
+    scroll-padding-top: 100px;
+    /* keeps scroll positions correct */
 }
 
-/* Accessibility helpers */
-.visually-hidden{position:absolute!important;height:1px;width:1px;overflow:hidden;clip:rect(1px,1px,1px,1px);white-space:nowrap}
+h1 {
+    color: #222;
+    margin-top: 60px;
+    scroll-margin-top: 100px;
+    /* adjust this to your nav height */
 
-/* Small utility */
-.muted{color:var(--muted);font-size:0.9rem}
+}
 
-/* Print-friendly tweaks */
-@media print{
-  #menu{display:none}
-  body > h1, body > section{margin-left:0;padding:0}
-  pre{page-break-inside:avoid}
+h2 {
+    color: #222;
+    margin: 0 0 12px;
+}
+
+section {
+    background: #fff;
+    padding: 20px;
+    margin: 0 0 18px;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, .06);
+    scroll-margin-top: 60px;
+    /* adjust this to your nav height */
+
+}
+
+ul {
+    margin: 8px 0 0 18px;
+}
+
+img {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    border-radius: 10px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+th,
+td {
+    border-bottom: 1px solid #e5e7eb;
+    padding: 10px;
+    text-align: left;
+    vertical-align: top;
+}
+
+th {
+    background: #fafafa;
+}
+
+tfoot td {
+    font-weight: 700;
+}
+
+pre {
+    background: #111827;
+    color: #f9fafb;
+    padding: 16px;
+    border-radius: 8px;
+    overflow-x: auto;
+    /* allows horizontal scrolling */
+    overflow-y: auto;
+    /* allows vertical scrolling */
+    max-height: 400px;
+    /* limits height before scrolling */
+    font-family: "Courier New", monospace;
+    font-size: 0.9rem;
+    position: relative;
+}
+
+.copy-btn {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: #2563eb;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    padding: 4px 8px;
+    cursor: pointer;
+    font-size: 0.75rem;
+}
+
+.copy-btn:hover {
+    background: #1d4ed8;
+}
+
+/* --- Fixed top navigation bar --- */
+nav#menu {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: #ffffffee;
+    backdrop-filter: blur(4px);
+    border-bottom: 1px solid #e5e7eb;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+    z-index: 1000;
+    padding: 10px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+}
+
+nav#menu h3 {
+    margin: 0;
+    font-size: 1.1rem;
+    color: #111;
+}
+
+nav#menu ul {
+    display: flex;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    flex-wrap: wrap;
+}
+
+nav#menu li {
+    margin: 0 10px;
+}
+
+nav#menu a {
+    text-decoration: none;
+    color: #2563eb;
+    font-weight: 500;
+    font-size: 0.95rem;
+    transition: color 0.2s ease-in-out;
+}
+
+nav#menu a:hover {
+    color: #1d4ed8;
+    text-decoration: underline;
+}
+
+/* --- References section --- */
+
+#references a {
+    color: #1e40af;
+    text-decoration: none;
+}
+
+#references a:hover {
+    text-decoration: underline;
+}
+
+/* Responsive: hide menu on small screens */
+@media (max-width: 768px) {
+    nav#menu ul {
+        display: block;
+        margin-top: 8px;
+    }
+
+    nav#menu li {
+        margin: 4px 0;
+    }
+}
+
+/* === Printer-Friendly Version === */
+/* ===== Printer-friendly overrides (paste at end of styles.css) ===== */
+@media print {
+  /* hide interactive UI */
+  nav#menu,
+  .print-button,
+  .copy-btn {
+    display: none !important;
+  }
+
+  /* general page cleanup */
+  body {
+    background: #ffffff !important;
+    margin: 12mm !important; /* use printer-friendly margin */
+    color: #000 !important;
+  }
+
+  section {
+    box-shadow: none !important;
+    background: #fff !important;
+    padding: 0 0 12px !important;
+    margin: 0 0 12px !important;
+    border-radius: 0 !important;
+  }
+
+  /* make code blocks expand and paginate (no inner scrollbars) */
+  pre, pre > code, code.language-cpp, pre.line-numbers {
+    max-height: none !important;        /* remove fixed height */
+    overflow: visible !important;       /* allow it to flow onto pages */
+    white-space: pre-wrap !important;   /* wrap long lines so they don't overflow paper */
+    word-break: break-word !important;  /* safer breaking for long tokens */
+    background: #fff !important;        /* light background for printing */
+    color: #000 !important;
+    border: none !important;
+    -webkit-print-color-adjust: exact;   /* ensure colors (if any) print as specified */
+    page-break-inside: auto !important; /* allow splitting across pages when necessary */
+    break-inside: auto !important;
+  }
+
+  /* reduce padding so large code blocks don't push content off the page */
+  pre {
+    padding: 8px !important;
+    font-size: 10.5pt !important; /* slightly larger for PDFs if you prefer */
+  }
+
+  /* keep table layout printer-friendly */
+  table {
+    page-break-inside: auto;
+  }
+  tr {
+    page-break-inside: avoid;
+    page-break-after: auto;
+  }
+
+  /* images should scale to page width */
+  img {
+    max-width: 100% !important;
+    height: auto !important;
+    page-break-inside: avoid;
+  }
+
+  section {
+    page-break-before: always !important;
+    break-before: page !important;
+}
+section:first-of-type {
+    page-break-before: auto !important;
+    break-before: auto !important;
+}
+
+#print-hero {
+      display: block !important;
+      margin-bottom: 12mm;
+      text-align: center;
+  }
+
+  #print-hero img {
+      max-width: 100%;
+      height: auto;
+      margin-top: 5mm;
+  }
+  nav#menu,
+    nav#menu * {
+        display: none !important;
+        visibility: hidden !important;
+    }
+
 }

@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Air Guitar</title>
+  <title>Space Invaders</title>
 
   <!-- Prism.js syntax highlighting -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" />
@@ -35,7 +35,7 @@
   </nav>
 
 
-  <h1 id="top">Collision Warning System</h1>
+  <h1 id="top">Space Invaders</h1>
 
   <section id="information">
     <h2>Project Information</h2>
@@ -51,29 +51,20 @@
 
   <section id="introduction">
     <h2>Introduction</h2>
-    <p>This project uses an <strong>Arduino Uno</strong>, an <strong>HC-SR04 ultrasonic sensor</strong>, a
-      <strong>passive buzzer</strong>, and <strong>red/yellow/green LEDs</strong> to provide proximity-based
-      alerts, similar to automotive collision detection systems.
-    </p>
+    <p>This project implements a compact Space Invaders-style game on an Arduino Uno using a 128×64 SSD1306 OLED display and a two-axis joystick. It recreates core arcade mechanics — player movement, firing, enemy formations, and scoring — using text-mode rendering via the U8x8 library to fit within the display's constraints.</p>
+    <p>The implementation focuses on embedded-systems concepts: efficient frame timing, input debouncing, collision detection, simple enemy AI, and resource-conscious data structures. Controls are intentionally minimal — move with the joystick X axis and press the joystick button (SW) to fire — making it suitable for hands-on demos and classroom use.</p>
+    <p>The codebase is modular and extensible: level progression, adjustable enemy speed and firing rates, and simple bunkers are included. Suggested future enhancements include sound effects, richer enemy behaviors, sprite graphics using a graphical font, and additional gameplay features such as power-ups or high-score persistence.</p>
   </section>
 
   <section id="circuit-diagram">
     <h2>Circuit Diagram</h2>
-    <p>The ultrasonic sensor measures distance; the Arduino activates LEDs and the buzzer according to distance
-      thresholds.</p>
-    <img src="collision-warning-system-Arduino.jpg" alt="Arduino collision warning system">
+    <p>The SMRZA microcontroller launches the game experience by communicating with the Dual-Axis Joystick and the OLED Display.</p>
+    <img src="./assets/IMG_4556.jpeg" alt="Arduino Space Invaders">
   </section>
 
   <section id="environment">
-    <h2>Environmental Impact Assessment</h2>
-    <ul>
-      <li><strong>Materials:</strong> The Arduino Uno is RoHS and WEEE compliant, limiting hazardous substances.
-      </li>
-      <li><strong>Energy Efficiency:</strong> The circuit draws minimal power (~50 mA at 5V), ideal for USB or
-        solar power.</li>
-      <li><strong>Reusability:</strong> All components are modular and reusable, reducing electronic waste.</li>
-      <li><strong>Packaging & Shipping:</strong> Ordering all components from a single supplier helps minimize
-        carbon footprint.</li>
+    <h2>Environmental Impact Assessment</h2> 
+    <p>This project has a small but real environmental footprint. The electronic parts require metals and plastics that generate pollution and energy use during manufacturing, and they can become harmful e-waste if not disposed of properly. Shipping and packaging from online suppliers also add carbon emissions. However, most components—like the Arduino, breadboard, and jumper wires—are reusable, and the system uses very little power. With careful reuse and proper recycling, the overall environmental impact is sustainable</p>
     </ul>
   </section>
 
@@ -154,79 +145,535 @@
     <pre class="line-numbers">
   <button class="copy-btn" onclick="copyCode()">Copy</button>
   <code id="arduinoCode" class="language-cpp">
-// Collision Warning System with Distance Sensor (HC-SR04)
-// Author: Ana Rodrigues
-// Oct 2, 2025
-// Object is farther than 50cm: Green LED lights up
-// Object is closer than 50 cm, but more than 10cm away: Yellow LED lights, buzzer plays 300Hz tone
-// Object is closer than 10cm: Red LED lights up, buzzer plays 500Hz tone
+    /*
+  Space Invaders - Text-style clone for 128x64 OLED (U8x8lib)
+  Controls:
+    - Move: joystick X (A0)
+    - Fire: joystick button (SW) on pin 4 (wired to GND when pressed)
+  Libraries required:
+    - U8x8lib (already used in your previous sketches)
+*/
 
-//LED pins
-const int greenLED = 2;
-const int yellowLED = 3;
-const int redLED = 4;
+#include <Wire.h>
+#include <U8x8lib.h>
 
-// Ultrasonic sensor pins
-const int trigPin = 9;
-const int echoPin = 10;
+// Display (text mode on 128x64)
+U8X8_SSD1306_128X64_NONAME_HW_I2C display(U8X8_PIN_NONE);
 
-// Passive buzzer pin
-const int buzzer = 11;
+// Joystick
+#define JOY_X A0
+#define JOY_BTN 4
+
+// Screen grid (U8x8 text grid)
+const int COLS = 16;   // x positions 0..15
+const int ROWS = 8;    // y positions 0..7
+
+// Player
+int playerX = COLS/2;
+const int PLAYER_Y = 7;
+int lives = 3;
+unsigned long lastPlayerMove = 0;
+const unsigned long playerMoveDelay = 90; // ms between moves from joystick
+
+// Player bullets (upwards)
+const int MAX_PLAYER_BULLETS = 2;
+bool pBulletActive[MAX_PLAYER_BULLETS];
+int pBulletX[MAX_PLAYER_BULLETS];
+int pBulletY[MAX_PLAYER_BULLETS];
+
+// Enemy formation
+const int ENEMY_ROWS_START = 3;
+const int ENEMY_COLS = 6;
+int enemyRows = ENEMY_ROWS_START;
+struct Enemy {
+  int x;
+  int y;
+  bool alive;
+  byte type; // future use for different sprites/points
+};
+Enemy enemies[ENEMY_ROWS_START * ENEMY_COLS];
+
+// Enemy group movement
+int enemyDir = 1;            // 1 right, -1 left
+int enemyLeftBound = 0;
+int enemyRightBound = COLS - 1;
+unsigned long lastEnemyMove = 0;
+unsigned long enemyMoveInterval = 600; // ms, decreases with levels
+int enemyStepDown = 0;
+
+// Enemy bullets (downwards)
+const int MAX_ENEMY_BULLETS = 3;
+bool eBulletActive[MAX_ENEMY_BULLETS];
+int eBulletX[MAX_ENEMY_BULLETS];
+int eBulletY[MAX_ENEMY_BULLETS];
+unsigned long lastEnemyShot = 0;
+unsigned long enemyShotInterval = 1500; // ms, decreases with level
+
+// Bunkers (3) - simple health 0..3 (3 = full)
+const int NUM_BUNKERS = 3;
+int bunkerX[NUM_BUNKERS];
+int bunkerY = 5;
+int bunkerHealth[NUM_BUNKERS];
+const int BUNKER_MAX_HEALTH = 3;
+
+// Game state
+int score = 0;
+int level = 1;
+bool gameRunning = false;
+bool inStartScreen = true;
+unsigned long lastFirePress = 0; // debounce for joystick button
+const unsigned long fireDebounce = 140;
+
+// Timing for redraw step (keeps stable framerate)
+unsigned long lastFrame = 0;
+const unsigned long frameDelay = 40; // ~25 FPS
+
+// Helper function prototypes
+void startNewGame();
+void spawnEnemies();
+void resetBullets();
+void resetBunkers();
+void playerTryFire();
+void updatePlayerBullets();
+void updateEnemyBullets();
+void enemyTryShoot();
+void updateEnemies();
+void detectCollisions();
+void drawScreen();
+bool anyEnemiesAlive();
+void levelUp();
+int aliveEnemiesCount();
+int pickRandomAliveEnemyColumn(int colIdx);
 
 void setup() {
-  pinMode(greenLED, OUTPUT);
-  pinMode(yellowLED, OUTPUT);
-  pinMode(redLED, OUTPUT);
-  pinMode(trigPin, OUTPUT);
-  pinMode(echoPin, INPUT);
-  Serial.begin(9600);
+  display.begin();
+  display.setFont(u8x8_font_chroma48medium8_r);
+
+  pinMode(JOY_BTN, INPUT_PULLUP);
+
+  // Initialize arrays
+  startNewGame();
 }
 
 void loop() {
-  // Measure distance
-  digitalWrite(trigPin, LOW);
-  delayMicroseconds(2);
-  digitalWrite(trigPin, HIGH);
-  delayMicroseconds(10);
-  digitalWrite(trigPin, LOW);
+  unsigned long now = millis();
 
-  long duration = pulseIn(echoPin, HIGH);
-  long distance = duration * 0.034 / 2;
-
-  Serial.print("Distance: ");
-  Serial.print(distance);
-  Serial.println(" cm");
-  
-  //Error in measurement:
-  if (distance <= 0)
-    return;
-
-  //Too close:
-  if (distance <= 10) {
-    digitalWrite(greenLED, LOW);
-    digitalWrite(yellowLED, LOW);
-    digitalWrite(redLED, HIGH);
-    tone(buzzer, 500); // Play 500Hz tone
+  // Start screen or running?
+  if (inStartScreen) {
+    display.clear();
+    display.drawString(2, 2, "SPACE INVADERS");
+    display.drawString(3, 4, "Press joystick");
+    display.drawString(4, 5, "button to start");
+    display.drawString(0, 7, "A: move  SW: fire");
+    // start game when fire pressed
+    if (digitalRead(JOY_BTN) == LOW) {
+      delay(100);
+      inStartScreen = false;
+      gameRunning = true;
+      startNewGame();
+    }
+    delay(80);
     return;
   }
 
-  //Midrange:
-  if (distance <= 30) {
-    digitalWrite(greenLED, LOW);
-    digitalWrite(yellowLED, HIGH);
-    digitalWrite(redLED, LOW);
-    tone(buzzer, 300); // Play 300Hz tone
+  if (!gameRunning) {
+    // Game over display
+    display.clear();
+    display.drawString(3, 2, "GAME OVER");
+    char buf[16];
+    sprintf(buf, "Score: %d", score);
+    display.drawString(3, 4, buf);
+    display.drawString(1, 6, "Press SW to retry");
+    if (digitalRead(JOY_BTN) == LOW) {
+      delay(180);
+      inStartScreen = true;
+    }
+    delay(80);
     return;
   }
 
-  //Normal status:
-  digitalWrite(greenLED, HIGH);
-  digitalWrite(yellowLED, LOW);
-  digitalWrite(redLED, LOW);
-  noTone(buzzer); // stop buzzer
+  // Main game loop (non-blocking)
+  if (now - lastFrame >= frameDelay) {
+    lastFrame = now;
 
-  delay(100);
+    // Player movement (joystick + simple deadzone)
+    int xVal = analogRead(JOY_X);
+    if (now - lastPlayerMove > playerMoveDelay) {
+      if (xVal < 380) {
+        playerX = max(0, playerX - 1);
+        lastPlayerMove = now;
+      } else if (xVal > 640) {
+        playerX = min(COLS - 1, playerX + 1);
+        lastPlayerMove = now;
+      }
+    }
+
+    // Player fire (joystick button)
+    if (digitalRead(JOY_BTN) == LOW) {
+      if (now - lastFirePress >= fireDebounce) {
+        playerTryFire();
+        lastFirePress = now;
+      }
+    }
+
+    // Enemy movement timer
+    if (now - lastEnemyMove >= enemyMoveInterval) {
+      lastEnemyMove = now;
+      updateEnemies();
+    }
+
+    // Enemy shooting timer
+    if (now - lastEnemyShot >= enemyShotInterval) {
+      lastEnemyShot = now;
+      enemyTryShoot();
+    }
+
+    // Update bullets every frame (smoothness)
+    updatePlayerBullets();
+    updateEnemyBullets();
+
+    // Collisions (bullets vs enemies, bullets vs bunkers, enemy bullets vs player)
+    detectCollisions();
+
+    // Check level completed
+    if (!anyEnemiesAlive()) {
+      levelUp();
+    }
+
+    // Check player death
+    if (lives <= 0) {
+      gameRunning = false;
+    }
+
+    // Draw everything
+    drawScreen();
+  }
 }
+
+/* ---------- Game initialization & helpers ---------- */
+
+void startNewGame() {
+  score = 0;
+  level = 1;
+  lives = 3;
+  enemyMoveInterval = 600;
+  enemyShotInterval = 1500;
+  resetBullets();
+  spawnEnemies();
+  resetBunkers();
+  playerX = COLS / 2;
+  inStartScreen = false;
+  gameRunning = true;
+}
+
+void spawnEnemies() {
+  // spawn enemyRows rows and ENEMY_COLS columns
+  enemyRows = ENEMY_ROWS_START;
+  int idx = 0;
+  for (int r = 0; r < enemyRows; r++) {
+    for (int c = 0; c < ENEMY_COLS; c++) {
+      enemies[idx].alive = true;
+      enemies[idx].type = r; // top row type 0, etc
+      enemies[idx].x = 1 + c * 2;   // compact spacing (1,3,5,...)
+      enemies[idx].y = 1 + r;       // rows 1,2,3
+      idx++;
+    }
+  }
+  // update group bounds
+  enemyLeftBound = 0;
+  enemyRightBound = COLS - 1;
+  enemyDir = 1;
+  enemyStepDown = 0;
+}
+
+void resetBullets() {
+  for (int i = 0; i < MAX_PLAYER_BULLETS; i++) pBulletActive[i] = false;
+  for (int i = 0; i < MAX_ENEMY_BULLETS; i++) eBulletActive[i] = false;
+}
+
+void resetBunkers() {
+  int spacing = COLS / (NUM_BUNKERS + 1);
+  for (int i = 0; i < NUM_BUNKERS; i++) {
+    bunkerX[i] = (i+1) * spacing - 1; // centers
+    bunkerHealth[i] = BUNKER_MAX_HEALTH;
+  }
+}
+
+/* ---------- Player bullets ---------- */
+
+void playerTryFire() {
+  // find free slot
+  for (int i = 0; i < MAX_PLAYER_BULLETS; i++) {
+    if (!pBulletActive[i]) {
+      pBulletActive[i] = true;
+      pBulletX[i] = playerX;
+      pBulletY[i] = PLAYER_Y - 1;
+      // small immediate move so fire feels responsive
+      pBulletY[i]--;
+      return;
+    }
+  }
+}
+
+void updatePlayerBullets() {
+  for (int i = 0; i < MAX_PLAYER_BULLETS; i++) {
+    if (!pBulletActive[i]) continue;
+    // move up each frame
+    static unsigned long lastPBMove[MAX_PLAYER_BULLETS] = {0};
+    unsigned long now = millis();
+    const unsigned long pbStep = 70; // speed of player bullet
+    if (now - lastPBMove[i] >= pbStep) {
+      lastPBMove[i] = now;
+      pBulletY[i]--;
+      if (pBulletY[i] < 0) {
+        pBulletActive[i] = false;
+      }
+    }
+  }
+}
+
+/* ---------- Enemy bullets ---------- */
+
+void enemyTryShoot() {
+  // pick a few random alive enemies to shoot based on level and free slots
+  int attempts = 2 + level/2; // more attempts at higher levels
+  for (int a = 0; a < attempts; a++) {
+    // pick random alive enemy index
+    int alive = aliveEnemiesCount();
+    if (alive == 0) return;
+
+    int pick = random(0, alive);
+    int idx = -1;
+    // map pick to the actual alive enemy index from top-left scan
+    int seen = 0;
+    for (int i = 0; i < enemyRows * ENEMY_COLS; i++) {
+      if (i >= (enemyRows * ENEMY_COLS)) break;
+      if (enemies[i].alive) {
+        if (seen == pick) {
+          idx = i;
+          break;
+        }
+        seen++;
+      }
+    }
+    if (idx < 0) continue;
+
+    // place bullet in a free slot
+    for (int b = 0; b < MAX_ENEMY_BULLETS; b++) {
+      if (!eBulletActive[b]) {
+        eBulletActive[b] = true;
+        eBulletX[b] = enemies[idx].x;
+        eBulletY[b] = enemies[idx].y + 1;
+        break;
+      }
+    }
+  }
+}
+
+void updateEnemyBullets() {
+  for (int i = 0; i < MAX_ENEMY_BULLETS; i++) {
+    if (!eBulletActive[i]) continue;
+    static unsigned long lastEBMove[MAX_ENEMY_BULLETS] = {0};
+    unsigned long now = millis();
+    const unsigned long ebStep = 140; // speed
+    if (now - lastEBMove[i] >= ebStep) {
+      lastEBMove[i] = now;
+      eBulletY[i]++;
+      if (eBulletY[i] > PLAYER_Y) {
+        eBulletActive[i] = false;
+      }
+    }
+  }
+}
+
+/* ---------- Enemy movement & behavior ---------- */
+
+void updateEnemies() {
+  // compute bounds of alive enemies
+  int left = COLS, right = -1;
+  for (int i = 0; i < enemyRows * ENEMY_COLS; i++) {
+    if (!enemies[i].alive) continue;
+    left = min(left, enemies[i].x);
+    right = max(right, enemies[i].x);
+  }
+  if (right == -1) return; // all dead
+
+  // check if next step hits border
+  bool willHitEdge = false;
+  if (enemyDir == 1 && right + 1 >= COLS) willHitEdge = true;
+  if (enemyDir == -1 && left - 1 < 0) willHitEdge = true;
+
+  if (willHitEdge) {
+    // move down instead and reverse
+    for (int i = 0; i < enemyRows * ENEMY_COLS; i++) {
+      if (!enemies[i].alive) continue;
+      enemies[i].y++;
+    }
+    enemyDir = -enemyDir;
+    enemyStepDown++;
+    // if enemies reach player's row, that's instant death (lose all lives)
+    for (int i = 0; i < enemyRows * ENEMY_COLS; i++) {
+      if (enemies[i].alive && enemies[i].y >= PLAYER_Y) {
+        lives = 0;
+      }
+    }
+  } else {
+    // normal horizontal move
+    for (int i = 0; i < enemyRows * ENEMY_COLS; i++) {
+      if (!enemies[i].alive) continue;
+      enemies[i].x += enemyDir;
+    }
+  }
+}
+
+/* ---------- Collisions ---------- */
+
+void detectCollisions() {
+  // Player bullets -> enemies or bunkers
+  for (int b = 0; b < MAX_PLAYER_BULLETS; b++) {
+    if (!pBulletActive[b]) continue;
+    // enemies
+    for (int i = 0; i < enemyRows * ENEMY_COLS; i++) {
+      if (!enemies[i].alive) continue;
+      if (pBulletX[b] == enemies[i].x && pBulletY[b] == enemies[i].y) {
+        // hit enemy
+        enemies[i].alive = false;
+        pBulletActive[b] = false;
+        score += 10 + (enemies[i].type * 5); // higher rows worth more
+        goto bulletHandled;
+      }
+    }
+    // bunkers
+    for (int bk = 0; bk < NUM_BUNKERS; bk++) {
+      if (bunkerHealth[bk] <= 0) continue;
+      if (pBulletX[b] == bunkerX[bk] && pBulletY[b] == bunkerY) {
+        bunkerHealth[bk]--;
+        pBulletActive[b] = false;
+        goto bulletHandled;
+      }
+    }
+    // no collision -> continue
+bulletHandled: ;
+  }
+
+  // Enemy bullets -> player or bunkers
+  for (int b = 0; b < MAX_ENEMY_BULLETS; b++) {
+    if (!eBulletActive[b]) continue;
+    // player
+    if (eBulletX[b] == playerX && eBulletY[b] == PLAYER_Y) {
+      // hit player
+      eBulletActive[b] = false;
+      lives--;
+      // brief flash could be added
+      continue;
+    }
+    // bunkers
+    for (int bk = 0; bk < NUM_BUNKERS; bk++) {
+      if (bunkerHealth[bk] <= 0) continue;
+      if (eBulletX[b] == bunkerX[bk] && eBulletY[b] == bunkerY) {
+        bunkerHealth[bk]--;
+        eBulletActive[b] = false;
+        break;
+      }
+    }
+  }
+}
+
+/* ---------- Drawing ---------- */
+
+void drawScreen() {
+  display.clear();
+
+  // HUD: score and lives and level
+  char hud[20];
+  sprintf(hud, "S:%04d L:%d LV:%d", score, lives, level);
+  display.drawString(0, 0, hud);
+
+  // draw enemies
+  for (int i = 0; i < enemyRows * ENEMY_COLS; i++) {
+    if (enemies[i].alive) {
+      // choose char by type for some variety
+      const char *ch = (enemies[i].type == 0) ? "M" : (enemies[i].type == 1 ? "W" : "V");
+      display.drawString(enemies[i].x, enemies[i].y, ch);
+    }
+  }
+
+  // draw bunkers (visual degrade by health)
+  for (int bk = 0; bk < NUM_BUNKERS; bk++) {
+    if (bunkerHealth[bk] <= 0) continue;
+    // choose char representing bunker health: 3->"@", 2->"#", 1->"="
+    const char *bch = bunkerHealth[bk] == 3 ? "@" : (bunkerHealth[bk] == 2 ? "#" : "=");
+    display.drawString(bunkerX[bk]-1, bunkerY, bch); // shift left to occupy ~3 columns look
+  }
+
+  // draw player
+  display.drawString(playerX, PLAYER_Y, "A");
+
+  // draw player bullets
+  for (int i = 0; i < MAX_PLAYER_BULLETS; i++) {
+    if (pBulletActive[i]) {
+      display.drawString(pBulletX[i], pBulletY[i], "|");
+    }
+  }
+
+  // draw enemy bullets
+  for (int i = 0; i < MAX_ENEMY_BULLETS; i++) {
+    if (eBulletActive[i]) {
+      display.drawString(eBulletX[i], eBulletY[i], "!");
+    }
+  }
+}
+
+/* ---------- Level & helpers ---------- */
+
+bool anyEnemiesAlive() {
+  for (int i = 0; i < enemyRows * ENEMY_COLS; i++) {
+    if (enemies[i].alive) return true;
+  }
+  return false;
+}
+
+int aliveEnemiesCount() {
+  int cnt = 0;
+  for (int i = 0; i < enemyRows * ENEMY_COLS; i++) if (enemies[i].alive) cnt++;
+  return cnt;
+}
+
+void levelUp() {
+  level++;
+  // speed up enemies and shooting
+  if (enemyMoveInterval > 120) enemyMoveInterval -= 70; // faster horizontal moves
+  if (enemyShotInterval > 400) enemyShotInterval -= 150;
+  // increase rows up to a limit
+  if (enemyRows < 5) enemyRows++;
+  // respawn enemies with more rows
+  int oldRows = enemyRows;
+  // recreate enemies array with new row count
+  int idx = 0;
+  for (int r = 0; r < enemyRows; r++) {
+    for (int c = 0; c < ENEMY_COLS; c++) {
+      enemies[idx].alive = true;
+      enemies[idx].type = r % 3;
+      enemies[idx].x = 1 + c * 2;
+      enemies[idx].y = 1 + r;
+      idx++;
+    }
+  }
+  // optionally refill bunkers a bit
+  for (int b = 0; b < NUM_BUNKERS; b++) {
+    bunkerHealth[b] = min(BUNKER_MAX_HEALTH, bunkerHealth[b] + 1);
+  }
+  // small level-up pause/message
+  display.clear();
+  char buf[16];
+  sprintf(buf, "LEVEL %d", level);
+  display.drawString(4, 3, buf);
+  display.drawString(2, 5, "Get ready...");
+  delay(900);
+  resetBullets();
+}
+
+/* End of sketch */
     </code></pre>
 
     <script>
@@ -243,10 +690,9 @@ void loop() {
 
   <section id="conclusion">
     <h2>Conclusion</h2>
-    <p>The Collision Warning System successfully demonstrates how a low-cost Arduino Uno, an HC-SR04 ultrasonic sensor, LEDs, and a passive buzzer can be combined to provide real-time proximity alerts. The prototype implements three clear alert states (safe, caution, danger) and translates measured distances into unambiguous visual and auditory feedback suitable for simple collision-warning applications and classroom demonstrations.</p>
-    <p>In testing, the system reliably detected objects in the defined ranges and activated the corresponding LEDs and tones. Practical limitations observed include the sensor's beam angle and sensitivity to soft or irregular surfaces, occasional spurious readings, and limited buzzer audibility in noisy environments. Electrical power requirements are minimal, making the design appropriate for battery or USB-powered setups.</p>
-    <p>Recommended improvements include adding simple filtering or averaging of distance readings to reduce noise, implementing debounce/validation logic to avoid false triggers, and integrating a small display (e.g., SSD1306 OLED) to show numerical distance values. For more robust real-world use, consider higher-grade ranging sensors, adjustable thresholds, and enclosure/mounting design for stable sensor orientation.</p>
-    <p>Overall, this project provides a compact, educational proof-of-concept for proximity-based alerts and serves as a practical platform for further experimentation with sensors, embedded control logic, and human-machine feedback mechanisms.</p>
+    <p>The Space Invaders project successfully demonstrates how an Arduino Uno. can be combined to create a simple yet engaging game. The prototype implements basic game mechanics, including player movement, enemy behavior, and scoring, all displayed on a 128x64 OLED screen.</p>
+    <p>During testing, the game provided an enjoyable experience, with responsive controls and clear visual feedback. The use of the joystick for movement and firing added to the arcade-like feel of the game. Some limitations were noted, such as the simplicity of enemy AI and the lack of sound effects, which could be areas for future enhancement.</p>
+    <p>Recommended improvements include adding sound effects using a buzzer, implementing more complex enemy  behaviors, and introducing power-ups or additional levels to increase replayability. Overall, this project serves as a solid foundation for further exploration into game development on embedded systems.</p>
   </section>
 
  <section id="references">
